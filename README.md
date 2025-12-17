@@ -344,8 +344,7 @@ vercel --prod
 - **Status Page**: [https://status.dabdub.xyz](https://status.dabdub.xyz)
 
 ### Community
-- **Twitter**: [@CryptoSettle](https://twitter.com/dabdubpay)
-- **Telegram**: [CryptoSettle Community](https://t.me/dabdubpay)
+- **Twitter**: [@dabdubpay](https://twitter.com/dabdubpay)
 
 
 ## 📞 Support
