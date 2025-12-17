@@ -9,4 +9,10 @@ const config = withPWA({
 
 export default config({
   // your existing Next.js config
+  webpack: (config) => {
+    // ... custom webpack logic ...
+    return config;
+  },
+
+  turbopack: {},
 });
