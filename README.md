@@ -1,4 +1,4 @@
-# DabDub - Universal Crypto-to-Fiat Settlement Infrastructure
+# DabDub - Universal Crypto-to-Fiat Settlement frontend
 
 > **Seamless crypto payments, instant fiat settlements** - A multi-chain settlement infrastructure that bridges Web3 payments with traditional banking, enabling merchants to accept stablecoin payments and receive instant fiat settlements.
 
