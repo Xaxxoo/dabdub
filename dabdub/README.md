@@ -1,10 +1,10 @@
-# DabDub - Universal Crypto-to-Fiat Settlement Infrastructure
+ # DabDub - Universal Crypto-to-Fiat Settlement Infrastructure
 
 > **Seamless crypto payments, instant fiat settlements** - A multi-chain settlement infrastructure that bridges Web3 payments with traditional banking, enabling merchants to accept stablecoin payments and receive instant fiat settlements.
 
-## Overview
+##  Overview
 
-DabDub is a B2B2C payment settlement platform that enables businesses to accept cryptocurrency payments (USDC) from customers while receiving instant fiat settlements in their bank accounts. Built with multi-chain support across EVM and non-EVM networks, it abstracts away blockchain complexity for merchants while providing secure, compliant, and fast payment processing.
+CryptoSettle is a B2B2C payment settlement platform that enables businesses to accept cryptocurrency payments (USDC) from customers while receiving instant fiat settlements in their bank accounts. Built with multi-chain support across EVM and non-EVM networks, it abstracts away blockchain complexity for merchants while providing secure, compliant, and fast payment processing.
 
 ### Key Value Propositions
 
@@ -15,7 +15,7 @@ DabDub is a B2B2C payment settlement platform that enables businesses to accept 
 - **Enterprise-Grade**: Built for scale with monitoring, webhooks, and APIs
 - **Progressive Web App**: Works offline, installable on any device
 
-## 🏗️ Architecture
+## Architecture
 
 ### Technology Stack
 
@@ -81,7 +81,7 @@ DabDub is a B2B2C payment settlement platform that enables businesses to accept 
    - Best for: Bitcoin-secured settlements
 
 
-## 🚀 Features
+## Features
 
 ### Core Functionality
 
@@ -155,29 +155,8 @@ DabDub is a B2B2C payment settlement platform that enables businesses to accept 
 ### Prerequisites
 
 - Node.js 18+ and npm/yarn/pnpm
-- PostgreSQL 14+
-- Redis 6+ (optional, for caching)
-- Docker & Docker Compose (recommended)
+- Nextjs 
 
-### Quick Start with Docker
-
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/cryptosettle.git
-cd cryptosettle
-
-# Copy environment variables
-cp .env.example .env
-
-# Edit .env with your configurations
-nano .env
-
-# Start all services with Docker Compose
-docker-compose up -d
-
-# Backend will be available at http://localhost:3000
-# Frontend will be available at http://localhost:3001
-```
 
 ### Manual Setup
 
@@ -363,8 +342,7 @@ vercel --prod
 - **Status Page**: [https://status.dabdub.xyz](https://status.dabdub.xyz)
 
 ### Community
-- **Twitter**: [@CryptoSettle](https://twitter.com/dabdubpay)
-- **Telegram**: [CryptoSettle Community](https://t.me/dabdubpay)
+- **Twitter**: [@dabdubpay](https://twitter.com/dabdubpay)
 
 
 ## 📞 Support
