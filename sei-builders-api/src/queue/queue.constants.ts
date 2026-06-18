@@ -35,5 +35,18 @@ export const JOB_NAMES = {
 
   // GitHub sync
   SYNC_REPOSITORIES: 'sync-repositories',
+  SYNC_REPOSITORY: 'sync-repository',
+  SYNC_REPOSITORY_ISSUES: 'sync-repository-issues',
+  SYNC_REPOSITORY_PRS: 'sync-repository-prs',
+  SYNC_REPOSITORY_CONTRIBUTORS: 'sync-repository-contributors',
+  SYNC_REPOSITORY_LANGUAGES: 'sync-repository-languages',
   SYNC_CONTRIBUTORS: 'sync-contributors',
+  SYNC_GITHUB_ORG: 'sync-github-org',
+  SYNC_GITHUB_TEAMS: 'sync-github-teams',
+
+  // Dead-letter / retry
+  DLQ_WEBHOOK: 'dlq-webhook',
+  DLQ_SYNC: 'dlq-sync',
+  RETRY_WEBHOOK: 'retry-webhook',
+  RETRY_SYNC: 'retry-sync',
 } as const;
