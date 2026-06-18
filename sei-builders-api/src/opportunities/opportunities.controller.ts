@@ -14,6 +14,7 @@ import {
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { OpportunitiesService } from './opportunities.service';
 import { CreateOpportunityDto } from './dto/create-opportunity.dto';
+import { AssignOpportunityDto } from './dto/assign-opportunity.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -84,6 +85,25 @@ export class OpportunitiesController {
     @CurrentUser() user: UserEntity,
   ) {
     return this.oppsService.reopen(id, user.id);
+  }
+
+  @Post(':id/assign')
+  @ApiOperation({ summary: 'Assign opportunity to a user' })
+  assign(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: AssignOpportunityDto,
+    @CurrentUser() user: UserEntity,
+  ) {
+    return this.oppsService.assign(id, dto, user.id);
+  }
+
+  @Post(':id/unassign')
+  @ApiOperation({ summary: 'Unassign opportunity (back to open)' })
+  unassign(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: UserEntity,
+  ) {
+    return this.oppsService.unassign(id, user.id);
   }
 
   @Delete(':id')

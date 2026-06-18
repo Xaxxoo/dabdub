@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -6,6 +6,7 @@ import {
   OpportunityStatus,
 } from './entities/opportunity.entity';
 import { CreateOpportunityDto } from './dto/create-opportunity.dto';
+import { AssignOpportunityDto } from './dto/assign-opportunity.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { buildPaginatedResult } from '../common/utils/pagination.util';
 import { CacheService } from '../cache/cache.service';
@@ -129,5 +130,40 @@ export class OpportunitiesService {
     }
     await this.oppRepo.softDelete(id);
     await this.cache.del(CACHE_KEYS.OPPORTUNITY(id));
+  }
+
+  async assign(
+    id: string,
+    dto: AssignOpportunityDto,
+    requesterId: string,
+  ): Promise<OpportunityEntity> {
+    const opp = await this.findById(id);
+    if (opp.createdById !== requesterId) {
+      throw new ForbiddenException('Only the creator can assign this opportunity');
+    }
+    if (opp.status !== OpportunityStatus.OPEN && opp.status !== OpportunityStatus.IN_PROGRESS) {
+      throw new BadRequestException('Can only assign open or in-progress opportunities');
+    }
+    await this.oppRepo.update(id, {
+      assignedToId: dto.userId,
+      status: OpportunityStatus.IN_PROGRESS,
+    });
+    await this.cache.del(CACHE_KEYS.OPPORTUNITY(id));
+    return this.findById(id);
+  }
+
+  async unassign(id: string, requesterId: string): Promise<OpportunityEntity> {
+    const opp = await this.findById(id);
+    if (opp.createdById !== requesterId) {
+      throw new ForbiddenException('Only the creator can unassign this opportunity');
+    }
+    await this.oppRepo
+      .createQueryBuilder()
+      .update()
+      .set({ assignedToId: null as any, status: OpportunityStatus.OPEN })
+      .where('id = :id', { id })
+      .execute();
+    await this.cache.del(CACHE_KEYS.OPPORTUNITY(id));
+    return this.findById(id);
   }
 }
