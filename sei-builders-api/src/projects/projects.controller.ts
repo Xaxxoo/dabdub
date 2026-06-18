@@ -14,6 +14,8 @@ import {
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
+import { ConnectProjectRepositoryDto } from './dto/connect-repository.dto';
+import { UpdateContributionSettingsDto } from './dto/update-contribution-settings.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -29,11 +31,20 @@ import { IsPublic } from '../common/decorators/is-public.decorator';
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
+  // ─── Public reads ──────────────────────────────────────────────────────────
+
   @IsPublic()
   @Get()
   @ApiOperation({ summary: 'List all active projects' })
   findAll(@Query() pagination: PaginationDto) {
     return this.projectsService.findAll(pagination);
+  }
+
+  @IsPublic()
+  @Get('slug/:slug')
+  @ApiOperation({ summary: 'Get project by slug' })
+  findBySlug(@Param('slug') slug: string) {
+    return this.projectsService.findBySlug(slug);
   }
 
   @IsPublic()
@@ -44,11 +55,13 @@ export class ProjectsController {
   }
 
   @IsPublic()
-  @Get('slug/:slug')
-  @ApiOperation({ summary: 'Get project by slug' })
-  findBySlug(@Param('slug') slug: string) {
-    return this.projectsService.findBySlug(slug);
+  @Get(':id/repositories')
+  @ApiOperation({ summary: 'List repositories connected to this project' })
+  getRepositories(@Param('id', ParseUUIDPipe) id: string) {
+    return this.projectsService.getRepositories(id);
   }
+
+  // ─── Mutations ────────────────────────────────────────────────────────────
 
   @Post()
   @Roles('MAINTAINER', 'ADMIN')
@@ -68,6 +81,16 @@ export class ProjectsController {
     @CurrentUser() user: UserEntity,
   ) {
     return this.projectsService.update(id, dto, user.id);
+  }
+
+  @Patch(':id/contribution-settings')
+  @ApiOperation({ summary: 'Update contribution settings' })
+  updateContributionSettings(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateContributionSettingsDto,
+    @CurrentUser() user: UserEntity,
+  ) {
+    return this.projectsService.updateContributionSettings(id, dto, user.id);
   }
 
   @Patch(':id/publish')
@@ -96,5 +119,28 @@ export class ProjectsController {
     @CurrentUser() user: UserEntity,
   ) {
     return this.projectsService.softDelete(id, user.id);
+  }
+
+  // ─── Repository connections ────────────────────────────────────────────────
+
+  @Post(':id/repositories')
+  @ApiOperation({ summary: 'Connect a repository to this project' })
+  connectRepository(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ConnectProjectRepositoryDto,
+    @CurrentUser() user: UserEntity,
+  ) {
+    return this.projectsService.connectRepository(id, dto, user.id);
+  }
+
+  @Delete(':id/repositories/:repositoryId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Disconnect a repository from this project' })
+  disconnectRepository(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('repositoryId', ParseUUIDPipe) repositoryId: string,
+    @CurrentUser() user: UserEntity,
+  ) {
+    return this.projectsService.disconnectRepository(id, repositoryId, user.id);
   }
 }

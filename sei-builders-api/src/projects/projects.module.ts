@@ -5,10 +5,16 @@ import { ProjectsController } from './projects.controller';
 import { ProjectEntity } from './entities/project.entity';
 import { ProjectCategoryEntity } from './entities/project-category.entity';
 import { TagEntity } from './entities/tag.entity';
+import { RepositoryEntity } from '../repositories/entities/repository.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ProjectEntity, ProjectCategoryEntity, TagEntity]),
+    TypeOrmModule.forFeature([
+      ProjectEntity,
+      ProjectCategoryEntity,
+      TagEntity,
+      RepositoryEntity,
+    ]),
   ],
   providers: [ProjectsService],
   controllers: [ProjectsController],

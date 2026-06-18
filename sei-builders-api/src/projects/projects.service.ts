@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -6,7 +7,10 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProjectEntity, ProjectStatus } from './entities/project.entity';
+import { RepositoryEntity } from '../repositories/entities/repository.entity';
 import { CreateProjectDto } from './dto/create-project.dto';
+import { ConnectProjectRepositoryDto } from './dto/connect-repository.dto';
+import { UpdateContributionSettingsDto } from './dto/update-contribution-settings.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { buildPaginatedResult } from '../common/utils/pagination.util';
 import { generateUniqueSlug } from '../common/utils/slug.util';
@@ -18,6 +22,8 @@ export class ProjectsService {
   constructor(
     @InjectRepository(ProjectEntity)
     private readonly projectRepo: Repository<ProjectEntity>,
+    @InjectRepository(RepositoryEntity)
+    private readonly repoRepo: Repository<RepositoryEntity>,
     private readonly cache: CacheService,
   ) {}
 
@@ -121,5 +127,75 @@ export class ProjectsService {
     }
     await this.projectRepo.softDelete(id);
     await this.cache.del(CACHE_KEYS.PROJECT(id));
+  }
+
+  async connectRepository(
+    id: string,
+    dto: ConnectProjectRepositoryDto,
+    userId: string,
+  ): Promise<ProjectEntity> {
+    const project = await this.findById(id);
+    if (project.ownerId !== userId) {
+      throw new ForbiddenException('Only the project owner can connect repositories');
+    }
+
+    const repo = await this.repoRepo.findOne({ where: { id: dto.repositoryId } });
+    if (!repo) throw new NotFoundException(`Repository ${dto.repositoryId} not found`);
+
+    // Associate the repository with this project
+    await this.repoRepo.update(dto.repositoryId, { projectId: id });
+
+    // Optionally set as primary repository
+    if (dto.setPrimary) {
+      await this.projectRepo.update(id, { primaryRepositoryId: dto.repositoryId });
+    }
+
+    await this.cache.del(CACHE_KEYS.PROJECT(id));
+    return this.findById(id);
+  }
+
+  async disconnectRepository(
+    id: string,
+    repositoryId: string,
+    userId: string,
+  ): Promise<void> {
+    const project = await this.findById(id);
+    if (project.ownerId !== userId) {
+      throw new ForbiddenException('Only the project owner can disconnect repositories');
+    }
+
+    const repo = await this.repoRepo.findOne({
+      where: { id: repositoryId, projectId: id },
+    });
+    if (!repo) {
+      throw new BadRequestException('Repository is not connected to this project');
+    }
+
+    await this.repoRepo.update(repositoryId, { projectId: null as any });
+
+    // Clear primary reference if it was the primary repo
+    if (project.primaryRepositoryId === repositoryId) {
+      await this.projectRepo.update(id, { primaryRepositoryId: null as any });
+    }
+
+    await this.cache.del(CACHE_KEYS.PROJECT(id));
+  }
+
+  async updateContributionSettings(
+    id: string,
+    dto: UpdateContributionSettingsDto,
+    userId: string,
+  ): Promise<ProjectEntity> {
+    const project = await this.findById(id);
+    if (project.ownerId !== userId) {
+      throw new ForbiddenException('Only the project owner can update contribution settings');
+    }
+    await this.projectRepo.update(id, dto as any);
+    await this.cache.del(CACHE_KEYS.PROJECT(id));
+    return this.findById(id);
+  }
+
+  async getRepositories(id: string): Promise<RepositoryEntity[]> {
+    return this.repoRepo.find({ where: { projectId: id } });
   }
 }
