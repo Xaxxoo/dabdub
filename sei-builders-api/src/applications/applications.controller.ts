@@ -11,18 +11,12 @@ import {
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApplicationsService } from './applications.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
+import { ReviewApplicationDto, CompleteApplicationDto } from './dto/review-application.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { ParseUUIDPipe } from '../common/pipes/parse-uuid.pipe';
 import { UserEntity } from '../users/entities/user.entity';
-import { IsOptional, IsString } from 'class-validator';
-
-class ReviewDto {
-  @IsString()
-  @IsOptional()
-  notes?: string;
-}
 
 @ApiTags('Applications')
 @UseGuards(JwtAuthGuard)
@@ -63,11 +57,21 @@ export class ApplicationsController {
     return this.appsService.findById(id);
   }
 
+  @Patch(':id/start-review')
+  @ApiOperation({ summary: 'Mark an application as under review' })
+  startReview(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ReviewApplicationDto,
+    @CurrentUser() user: UserEntity,
+  ) {
+    return this.appsService.startReview(id, user.id, dto.notes);
+  }
+
   @Patch(':id/accept')
   @ApiOperation({ summary: 'Accept an application' })
   accept(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: ReviewDto,
+    @Body() dto: ReviewApplicationDto,
     @CurrentUser() user: UserEntity,
   ) {
     return this.appsService.accept(id, user.id, dto.notes);
@@ -77,10 +81,20 @@ export class ApplicationsController {
   @ApiOperation({ summary: 'Reject an application' })
   reject(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: ReviewDto,
+    @Body() dto: ReviewApplicationDto,
     @CurrentUser() user: UserEntity,
   ) {
     return this.appsService.reject(id, user.id, dto.notes);
+  }
+
+  @Patch(':id/complete')
+  @ApiOperation({ summary: 'Mark an accepted application as completed' })
+  complete(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CompleteApplicationDto,
+    @CurrentUser() user: UserEntity,
+  ) {
+    return this.appsService.complete(id, user.id, dto.prUrl, dto.notes);
   }
 
   @Patch(':id/withdraw')

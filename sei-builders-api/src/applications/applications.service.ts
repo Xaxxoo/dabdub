@@ -128,4 +128,38 @@ export class ApplicationsService {
     await this.appRepo.update(id, { status: ApplicationStatus.WITHDRAWN });
     return this.findById(id);
   }
+
+  async startReview(id: string, reviewerId: string, notes?: string): Promise<ApplicationEntity> {
+    const app = await this.findById(id);
+    if (app.status !== ApplicationStatus.PENDING) {
+      throw new BadRequestException(`Cannot start review on application with status: ${app.status}`);
+    }
+    await this.appRepo.update(id, {
+      status: ApplicationStatus.REVIEWING,
+      reviewedById: reviewerId,
+      reviewedAt: new Date(),
+      reviewNotes: notes,
+    });
+    return this.findById(id);
+  }
+
+  async complete(
+    id: string,
+    reviewerId: string,
+    prUrl?: string,
+    notes?: string,
+  ): Promise<ApplicationEntity> {
+    const app = await this.findById(id);
+    if (app.status !== ApplicationStatus.ACCEPTED) {
+      throw new BadRequestException('Can only complete an accepted application');
+    }
+    await this.appRepo.update(id, {
+      status: ApplicationStatus.COMPLETED,
+      completedAt: new Date(),
+      prUrl,
+      reviewNotes: notes ?? app.reviewNotes,
+      reviewedById: reviewerId,
+    });
+    return this.findById(id);
+  }
 }
